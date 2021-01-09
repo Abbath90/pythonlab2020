@@ -11,6 +11,8 @@ from datetime import date, timedelta
 import matplotlib.pyplot as plt
 import urllib.request as req
 import json
+import math
+from pathlib import Path
 
 import asyncio
 
@@ -131,17 +133,17 @@ def create_temperature_df(top_cities, list_of_min_and_max_temp_by_city):
 
 
 def generate_plots(df):
-    df[df.columns[::2]].plot(title='Max temperature changing')
-    plt.legend(bbox_to_anchor=(1, 1))
-    plt.xlabel('Days')
-    plt.ylabel('Degrees')
-    plt.savefig("max_changing.png")
-
-    df[df.columns[1::2]].plot(title='Min temperature changing')
-    plt.legend(bbox_to_anchor=(1, 1))
-    plt.xlabel('Days')
-    plt.ylabel('Degrees')
-    plt.savefig("min_changing.png")
+    for max_min_pair in zip(df.columns[::2], df.columns[1::2]):
+        plt.figure()
+        country_code = max_min_pair[0][-6:-4]
+        city_name = max_min_pair[0][:-7]
+        df.loc[:, max_min_pair].plot(label='Temperature changing')
+        plt.xlabel('Days')
+        plt.ylabel('Degrees')
+        plt.legend()
+        path_to_plot = Path(f'{country_code}/{city_name}')
+        path_to_plot.mkdir(parents=True, exist_ok=True)
+        plt.savefig(path_to_plot / 'temperature_changing.png')
 
 
 def get_day_city_max_temp(df):
@@ -172,8 +174,28 @@ def get_max_dif(df):
     value_location = np.where(np_dif == np_dif.max())
     return (str(df.index[value_location[0]][0].date()), df.columns[5 * 2][:-4], round(np_dif.max(), 2))
 
+
+def index_marks(nrows, slice_size):
+    return range(slice_size, math.ceil(nrows / slice_size) * slice_size, slice_size)
+
+def split_df(dfm, slice_size):
+    indices = index_marks(dfm.shape[0], slice_size)
+    return np.split(dfm, indices)
+
+def create_splited_df_by_country_and_city(df, slice_size):
+    for city_name, grouped_df in df.reset_index().groupby('City'):
+        list_of_dfs = split_df(grouped_df, slice_size)
+        for splited_number, splited_df in enumerate(list_of_dfs):
+            path_to_df = Path(f'{city_name[-2:]}/{city_name[:-3]}')
+            path_to_df.mkdir(parents=True, exist_ok=True)
+            name_of_file = f'data_{splited_number}.csv'
+            splited_df.to_csv(path_to_df / name_of_file, index=False)
+
+
+
 if __name__ == "__main__":
     df = get_df_from_csv('./hotels.zip')
+    df['City'] = df['City'] + '_' + df['Country']
     df = clean_df(df)
     top_cities = get_series_of_top_cities(df)
     df = df[df['City'].isin(top_cities)].sort_values(['City'])
@@ -186,5 +208,8 @@ if __name__ == "__main__":
     e = get_day_city_min_temp(temperature_df)
     r = get_max_dif(temperature_df)
     print(q, w, e, r)
+    slice_size = 100
+    create_splited_df_by_country_and_city(df, slice_size)
+
 
 
