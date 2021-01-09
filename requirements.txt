@@ -1,0 +1,15 @@
+pytest
+pytest-sugar
+pytest-mock
+black
+isort
+pre-commit
+requests
+requests_mock
+pandas
+aiohttp
+bs4
+numpy==1.19.3
+lxml
+matplotlib
+geopy
