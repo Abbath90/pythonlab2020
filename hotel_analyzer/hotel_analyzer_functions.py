@@ -2,12 +2,12 @@ import asyncio
 import fnmatch
 import json
 import math
-import time
 import urllib.request as req
 from collections import Counter
 from datetime import date, timedelta
-from pathlib import Path
-from zipfile import Path, ZipFile
+from pathlib import Path as path_pathlib
+from typing import Any, Dict, List, Tuple
+from zipfile import ZipFile
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,7 +17,7 @@ from geopy.extra.rate_limiter import AsyncRateLimiter, RateLimiter
 from geopy.geocoders import Bing, Nominatim
 
 
-def get_df_from_csv(path_to_archive):
+def get_df_from_csv(path_to_archive: str) -> pd.DataFrame:
     with ZipFile(path_to_archive) as zipfiles:
         file_list = zipfiles.namelist()
         csv_files = fnmatch.filter(file_list, "*.csv")
@@ -29,7 +29,7 @@ def get_df_from_csv(path_to_archive):
     return pd.concat(data).reset_index().drop(["index"], axis=1).drop(columns=["Id"])
 
 
-def clean_df(df):
+def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df["Latitude"] = (
         df["Latitude"]
         .astype("str")
@@ -52,18 +52,18 @@ def clean_df(df):
     return df
 
 
-def get_most_common(series):
+def get_most_common(series: pd.Series) -> pd.Series:
     x = list(series)
     my_counter = Counter(x)
     return my_counter.most_common(1)[0][0]
 
 
-def get_series_of_top_cities(df):
+def get_series_of_top_cities(df: pd.DataFrame) -> pd.Series:
     df["City"] = df["City"] + "_" + df["Country"]
     return df.groupby(["Country"]).agg(get_most_common)["City"]
 
 
-def get_coordinations_of_center(df):
+def get_coordinations_of_center(df: pd.DataFrame) -> Tuple[np.array]:
     lat_max = df.groupby(["City"])["Latitude"].max().sort_index()
     lat_min = df.groupby(["City"])["Latitude"].min().sort_index()
     lon_max = df.groupby(["City"])["Longitude"].max().sort_index()
@@ -71,7 +71,7 @@ def get_coordinations_of_center(df):
     return (((lat_max + lat_min) / 2).values, ((lon_max + lon_min) / 2).values)
 
 
-def get_location_id_by_center_coord(coords, url):
+def get_location_id_by_center_coord(coords: Tuple[np.array], url: str) -> str:
     url = f'{url}/location/search/?lattlong={str(coords[0]) + "," + str(coords[1])}'
 
     with req.urlopen(url) as session:
@@ -81,7 +81,7 @@ def get_location_id_by_center_coord(coords, url):
         return data[0]["woeid"]
 
 
-def get_past_days_temp(city_id, url):
+def get_past_days_temp(city_id: str, url: str) -> dict:
     url = f'{url}/location/{city_id}/{date.today().strftime("%Y/%m/%d")}'
 
     with req.urlopen(url) as session:
@@ -91,7 +91,7 @@ def get_past_days_temp(city_id, url):
     return data
 
 
-def get_today_and_next_days_temp(city_id, url):
+def get_today_and_next_days_temp(city_id: str, url: str) -> dict:
     url = f"{url}/location/{city_id}"
 
     with req.urlopen(url) as session:
@@ -101,7 +101,7 @@ def get_today_and_next_days_temp(city_id, url):
     return data
 
 
-def get_temperature_in_city(city_id, url):
+def get_temperature_in_city(city_id: str, url: str) -> Tuple[list]:
     past_days_temp = get_past_days_temp(city_id, url)
     today_and_next_days_temp = get_today_and_next_days_temp(city_id, url)
 
@@ -127,13 +127,13 @@ def get_temperature_in_city(city_id, url):
     )
 
 
-def get_temperature(df):
+def get_temperature(df: pd.DataFrame) -> list:
     metaweather_url = "https://www.metaweather.com/api"
 
     center_coords = get_coordinations_of_center(df)
     location_ids_for_metaweather = [
         get_location_id_by_center_coord(lat_long, metaweather_url)
-        for lat_long in tuple(map(list, zip(*get_coordinations_of_center(df))))
+        for lat_long in tuple(map(list, zip(*center_coords)))
     ]
     temp_in_cities = [
         get_temperature_in_city(city_id, metaweather_url)
@@ -142,7 +142,9 @@ def get_temperature(df):
     return temp_in_cities
 
 
-def get_min_and_max_temp_values(list_of_min_and_max_temp_by_city):
+def get_min_and_max_temp_values(
+    list_of_min_and_max_temp_by_city: list,
+) -> Tuple[tuple, tuple]:
     list_of_min__temp_by_city = []
     list_of_max_temp_by_city = []
     for pair_list in list_of_min_and_max_temp_by_city:
@@ -157,7 +159,9 @@ def get_min_and_max_temp_values(list_of_min_and_max_temp_by_city):
     )
 
 
-def create_temperature_df(top_cities, list_of_min_and_max_temp_by_city):
+def create_temperature_df(
+    top_cities: pd.Series, list_of_min_and_max_temp_by_city: list
+) -> pd.DataFrame:
     date_index = pd.date_range(
         date.today() - timedelta(days=5), date.today() + timedelta(days=5), freq="d"
     )
@@ -177,7 +181,7 @@ def create_temperature_df(top_cities, list_of_min_and_max_temp_by_city):
     return temperature_df.reindex(sorted(temperature_df.columns), axis=1)
 
 
-def generate_plots(df, output_dir):
+def generate_plots(df: pd.DataFrame, output_dir: str) -> None:
     for max_min_pair in zip(df.columns[::2], df.columns[1::2]):
         plt.figure()
         country_code = max_min_pair[0][-6:-4]
@@ -186,12 +190,13 @@ def generate_plots(df, output_dir):
         plt.xlabel("Days")
         plt.ylabel("Degrees")
         plt.legend()
-        path_to_plot = Path(f"{output_dir}/{country_code}/{city_name}")
+        path_to_plot = path_pathlib(f"{output_dir}/{country_code}/{city_name}")
+
         path_to_plot.mkdir(parents=True, exist_ok=True)
         plt.savefig(path_to_plot / "temperature_changing.png")
 
 
-def get_day_city_max_temp(df):
+def get_day_city_max_temp(df: pd.DataFrame) -> Tuple[str, str, float]:
     max_value = df.max().max()
     date = df[df.isin([max_value]).any(axis=1)].index
     temp_df = df.loc[date].T
@@ -199,14 +204,14 @@ def get_day_city_max_temp(df):
     return (str(date[0].date()), city[0][:-4], max_value)
 
 
-def get_max_change(df):
+def get_max_change(df: pd.DataFrame) -> Tuple[str, float]:
     dif_by_city = df.iloc[-1] - df.iloc[0]
     city = dif_by_city[dif_by_city == dif_by_city.max()].index[0][:-4]
     value = round(dif_by_city[dif_by_city == dif_by_city.max()][0], 2)
     return (city, value)
 
 
-def get_day_city_min_temp(df):
+def get_day_city_min_temp(df: pd.DataFrame) -> Tuple[str, str, float]:
     min_value = df.min().min()
     date = df[df.isin([min_value]).any(axis=1)].index
     temp_df = df.loc[date].T
@@ -214,7 +219,7 @@ def get_day_city_min_temp(df):
     return (str(date[0].date()), city[0][:-4], min_value)
 
 
-def get_max_dif(df):
+def get_max_dif(df: pd.DataFrame) -> Tuple[str, str, float]:
     np_dif = df[df.columns[::2]].values - df[df.columns[1::2]].values
     value_location = np.where(np_dif == np_dif.max())
     return (
@@ -224,20 +229,32 @@ def get_max_dif(df):
     )
 
 
-def index_marks(nrows, slice_size):
+def get_temperature_info(temperature_df: pd.DataFrame) -> dict:
+
+    return {
+        "day_city_max_temp": get_day_city_max_temp(temperature_df),
+        "max_change": get_max_change(temperature_df),
+        "day_city_min_temp": get_day_city_min_temp(temperature_df),
+        "max_dif": get_max_dif(temperature_df),
+    }
+
+
+def index_marks(nrows, slice_size: int):
     return range(slice_size, math.ceil(nrows / slice_size) * slice_size, slice_size)
 
 
-def split_df(dfm, slice_size):
-    indices = index_marks(dfm.shape[0], slice_size)
-    return np.split(dfm, indices)
+def split_df(df: pd.DataFrame, slice_size: int) -> List[np.array]:
+    indices = index_marks(df.shape[0], slice_size)
+    return np.split(df, indices)
 
 
-def create_splited_df_by_country_and_city(df, slice_size, output_dir):
+def create_splited_df_by_country_and_city(
+    df: pd.DataFrame, slice_size: int, output_dir: str
+) -> None:
     for city_name, grouped_df in df.reset_index().groupby("City"):
         list_of_dfs = split_df(grouped_df, slice_size)
         for splited_number, splited_df in enumerate(list_of_dfs):
-            path_to_df = Path(f"{output_dir}/{city_name[-2:]}/{city_name[:-3]}")
+            path_to_df = path_pathlib(f"{output_dir}/{city_name[-2:]}/{city_name[:-3]}")
             path_to_df.mkdir(parents=True, exist_ok=True)
             name_of_file = f"data_{splited_number}.csv"
             splited_df.to_csv(path_to_df / name_of_file, index=False)

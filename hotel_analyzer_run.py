@@ -1,6 +1,5 @@
 import click
 
-from hotel_analyzer.hotel_analyzer_functions import *
 from hotel_analyzer.hotel_analyzer_main import hotel_analyzer_main
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -13,7 +12,8 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 @click.option("--output_dir", default="./results", help="Output dir for results.")
 @click.option("--size", default=100, help="Size of output csv's")
 @click.option("--threads", default=4, help="Number of threads")
-def start_hotel_analyzer(data, output_dir, size, threads):
+def start_hotel_analyzer(data: str, output_dir: str, size: int, threads: int) -> None:
+    """Example: hotel_analyzer_run.py --data=./data/hotels.zip --output_dir=./results"""
     hotel_analyzer_main(data, output_dir, size, threads)
 
 
