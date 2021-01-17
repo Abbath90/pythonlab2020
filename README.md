@@ -1,6 +1,11 @@
 # PythonLab - December 2020
 # Final course project
 
+Usage example:
+hotel_analyzer_run.py --data=../data/hotels.zip --output_dir=../res --size=100 --threads=5
+
+
+#Tasks
 Необходимо написать консольную утилиту для многопоточной обработки данных, аккумулирования результатов через API из Интернета и их дальнейшего представления на графиках.
 
 ## Входные данные
