@@ -1,16 +1,14 @@
-import asyncio
 import json
 import math
 import urllib.request as req
 from collections import Counter
 from datetime import date, timedelta
 from typing import List, Tuple
-
+from monroe.monroe import encode
+from concurrent.futures import ThreadPoolExecutor
 import numpy as np
 import pandas as pd
-from geopy.adapters import AioHTTPAdapter
-from geopy.extra.rate_limiter import AsyncRateLimiter, RateLimiter
-from geopy.geocoders import Bing, Nominatim
+
 
 
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -39,6 +37,7 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
         & (df["Longitude"] > -180)
     ]
     return df
+
 
 
 def get_most_common(series: pd.Series) -> pd.Series:
@@ -296,3 +295,27 @@ def split_df(df: pd.DataFrame, slice_size: int) -> List[np.array]:
     """
     indices = index_marks(df.shape[0], slice_size)
     return np.split(df, indices)
+
+
+def get_geohash_for_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Calculate geohash for df
+    :param df: Pandas dataframe.
+    :return: Pandas dataframe.
+    """
+    df['geohash'] = df.apply(lambda x: encode(x['Latitude'], x['Longitude']), axis=1)
+    return df
+
+
+def multithread_calc_of_geohash(df: pd.DataFrame, numb_of_threads: int) -> pd.DataFrame:
+    """
+    Split input dataframe for
+    :param df: Pandas dataframe.
+    :param numb_of_threads: Number of threads for calculating.
+    :return: Pandas dataframe.
+    """
+    slice_size = 750
+    df_split = split_df(df, slice_size)
+    with ThreadPoolExecutor(numb_of_threads) as pool:
+        df = pd.concat(pool.map(get_geohash_for_df, df_split))
+    return df

@@ -3,6 +3,7 @@ from hotel_analyzer_functions import (
     create_temperature_df,
     get_series_of_top_cities,
     get_temperature,
+    multithread_calc_of_geohash
 )
 from hotel_analyzer_input import get_df_from_csv
 from hotel_analyzer_output import (
@@ -10,7 +11,6 @@ from hotel_analyzer_output import (
     generate_plots,
     get_temperature_info,
 )
-
 
 def hotel_analyzer_main(data: str, output_dir: str, size: int, threads: int) -> None:
     """
@@ -23,11 +23,12 @@ def hotel_analyzer_main(data: str, output_dir: str, size: int, threads: int) -> 
     """
     df = get_df_from_csv(data)
     df = clean_df(df)
+    df = multithread_calc_of_geohash(df, threads)
     top_cities = get_series_of_top_cities(df)
     df = df[df["City"].isin(top_cities)].sort_values(["City"])
-    df["address"] = df["Latitude"].astype(str) + " " + df["Longitude"].astype(str)
     list_of_min_and_max_temp_by_city = get_temperature(df)
     temperature_df = create_temperature_df(top_cities, list_of_min_and_max_temp_by_city)
+
     generate_plots(temperature_df, output_dir)
     get_temperature_info(temperature_df, output_dir)
     create_splited_df_by_country_and_city(df, size, output_dir)
