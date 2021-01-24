@@ -3,7 +3,7 @@ from hotel_analyzer_functions import (
     create_temperature_df,
     get_series_of_top_cities,
     get_temperature,
-    multithread_calc_of_geohash
+    multithread_calc_of_geohash,
 )
 from hotel_analyzer_input import get_df_from_csv
 from hotel_analyzer_output import (
@@ -11,6 +11,7 @@ from hotel_analyzer_output import (
     generate_plots,
     get_temperature_info,
 )
+
 
 def hotel_analyzer_main(data: str, output_dir: str, size: int, threads: int) -> None:
     """

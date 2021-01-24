@@ -1,25 +1,36 @@
 # PythonLab - December 2020
 # Final course project
 
-This tool analyze information about hotels. Receives data from zip-file with csvs. 
+This tool analyzes information about hotels, received from zip-file contains csvs.
+Hotel's data in cities with the most hotels in each country is grouped by country and city,
+presented as sliced csv-files. Geohash for each hotel is calculated. Weather information for each city is taken
+from web and presented as plots and json-file.
+
+### Running:
+`hotel_analyzer_run.py --data={path/to/data} [--output_dir={path/to/dir}] [size={slice_size}] [--threads={threads_number}]`
+
+Options:
+ - `--data TEXT`        Path to archive with data.
+ - `--output_dir TEXT`  Output dir for results.
+ - `--size INTEGER `    Size of output csv-files.
+ - `--threads INTEGER`  Number of threads.
+ - `-h, --help`         Show this message and exit.
+
 
 ### Usage example:
-hotel_analyzer_run.py --data=../data/hotels.zip --output_dir=../res --size=100 --threads=5
-
-
-
-
-
+`hotel_analyzer_run.py --data=../data/hotels.zip --output_dir=../res --size=100 --threads=5`
 
 
 
 ## Tasks
-Необходимо написать консольную утилиту для многопоточной обработки данных, аккумулирования результатов через API из Интернета и их дальнейшего представления на графиках.
+Необходимо написать консольную утилиту для многопоточной обработки данных, аккумулирования результатов через API из
+Интернета и их дальнейшего представления на графиках.
 
 ### Входные данные
 Входные данные находятся в каталоге **/data** в данном репозитории в упакованном виде в файле **hotels.zip**.
 
-Внутри данного архива расположено несколько файлов в формате _.CSV_, содержащих множество строк с информацией по отелям. В том числе, среди информации вы найдете:
+Внутри данного архива расположено несколько файлов в формате _.CSV_, содержащих множество строк с информацией по отелям.
+В том числе, среди информации вы найдете:
 
 - название отеля;
 - широту и долготу отеля;
@@ -50,7 +61,8 @@ hotel_analyzer_run.py --data=../data/hotels.zip --output_dir=../res --size=100 -
 
 3. Обработка данных:
 
-    - Обогатить данные по каждому из отелей в выбранных городах в **многопоточном режиме** его географическим адресом, полученным при помощи пакета **geopy**;
+    - Обогатить данные по каждому из отелей в выбранных городах в **многопоточном режиме** его географическим адресом,
+      полученным при помощи пакета **geopy**;
     - Вычислить географический центр области города, равноудаленный от крайних отелей.
     - Для центра области при помощи стороннего сервиса (например, _openweathermap.org_) получить погодные данные:
 
@@ -76,7 +88,8 @@ hotel_analyzer_run.py --data=../data/hotels.zip --output_dir=../res --size=100 -
     - В каталоге с указанной структурой для каждого города сохранить:
 
         - все полученные графики;
-        - список отелей (название, адрес, широта, долгота) в формате CSV в файлах, содержащих не более 100 записей в каждом;
+        - список отелей (название, адрес, широта, долгота) в формате CSV в файлах,
+          содержащих не более 100 записей в каждом;
         - полученную информацию по центру в произвольном формате, удобном для последующего использования.
 
 ### Требования к проекту

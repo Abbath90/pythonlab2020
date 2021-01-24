@@ -4,7 +4,6 @@ from .monroe import encode
 
 
 class TestMonroe:
-
     def test_encode_invalid_args(self):
         with pytest.raises(ValueError) as exc:
             encode("aa", 1)

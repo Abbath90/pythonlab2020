@@ -18,7 +18,7 @@ def encode(latitude: float, longitude: float, precision: int = 12) -> str:
         raise ValueError("Out of range")
 
     # Init stage
-    __base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
+    __base32 = "0123456789bcdefghjkmnpqrstuvwxyz"
     lat_interval, lon_interval = (-90.0, 90.0), (-180.0, 180.0)
     geohash = []
     bits = [16, 8, 4, 2, 1]
@@ -49,14 +49,16 @@ def encode(latitude: float, longitude: float, precision: int = 12) -> str:
             geohash += __base32[ch]
             bit = 0
             ch = 0
-    return ''.join(geohash)
+    return "".join(geohash)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--lon", required=True, type=float, help="Longitude of object")
     parser.add_argument("--lat", required=True, type=float, help="Latitude of object")
-    parser.add_argument("--precision", required=False, type=int, help="Precision of GeoHash")
+    parser.add_argument(
+        "--precision", required=False, type=int, help="Precision of GeoHash"
+    )
     args = parser.parse_args()
 
     precision = args.precision or 12
@@ -65,5 +67,5 @@ def main():
     print(f"GeoHash for Longitude: {args.lon} & Latitude: {args.lat} is '{geo_hash}'")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -32,7 +32,10 @@ def generate_plots(df: pd.DataFrame, output_dir: str) -> None:
         path_to_plot = Path(f"{output_dir}/{country_code}/{city_name}")
 
         path_to_plot.mkdir(parents=True, exist_ok=True)
-        plt.savefig(path_to_plot / "temperature_changing.png")
+        plt.savefig(path_to_plot / f"{country_code}_temperature_changing.png")
+        print(
+            f"{path_to_plot}/{country_code}_temperature_changing.png file created."[2:]
+        )
 
 
 def get_temperature_info(temperature_df: pd.DataFrame, output_dir) -> None:
@@ -52,6 +55,7 @@ def get_temperature_info(temperature_df: pd.DataFrame, output_dir) -> None:
     path_to_file.mkdir(exist_ok=True)
     with open(path_to_file / "general_hotel_info.json", "w") as f:
         json.dump(general_hotel_info, f)
+    print(f"{path_to_file}/general_hotel_info.json file created."[2:])
 
 
 def create_splited_df_by_country_and_city(
@@ -69,5 +73,6 @@ def create_splited_df_by_country_and_city(
         for splited_number, splited_df in enumerate(list_of_dfs):
             path_to_df = Path(f"{output_dir}/{city_name[-2:]}/{city_name[:-3]}")
             path_to_df.mkdir(parents=True, exist_ok=True)
-            name_of_file = f"data_{splited_number}.csv"
+            name_of_file = f"{city_name}_data_{splited_number}.csv"
             splited_df.to_csv(path_to_df / name_of_file, index=False)
+            print(f"{path_to_df}/{name_of_file} file created."[2:])

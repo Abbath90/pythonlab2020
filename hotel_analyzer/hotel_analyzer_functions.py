@@ -2,13 +2,13 @@ import json
 import math
 import urllib.request as req
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from typing import List, Tuple
-from monroe.monroe import encode
-from concurrent.futures import ThreadPoolExecutor
+
 import numpy as np
 import pandas as pd
-
+from monroe.monroe import encode
 
 
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -37,7 +37,6 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
         & (df["Longitude"] > -180)
     ]
     return df
-
 
 
 def get_most_common(series: pd.Series) -> pd.Series:
@@ -303,7 +302,7 @@ def get_geohash_for_df(df: pd.DataFrame) -> pd.DataFrame:
     :param df: Pandas dataframe.
     :return: Pandas dataframe.
     """
-    df['geohash'] = df.apply(lambda x: encode(x['Latitude'], x['Longitude']), axis=1)
+    df["geohash"] = df.apply(lambda x: encode(x["Latitude"], x["Longitude"]), axis=1)
     return df
 
 
