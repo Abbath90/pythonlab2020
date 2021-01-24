@@ -1,5 +1,5 @@
 import click
-from hotel_analyzer_main import hotel_analyzer_main
+from hotel_analyzer.hotel_analyzer.hotel_analyzer_main import hotel_analyzer_main
 
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 

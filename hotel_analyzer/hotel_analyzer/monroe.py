@@ -1,6 +1,3 @@
-import argparse
-
-
 def encode(latitude: float, longitude: float, precision: int = 12) -> str:
     """
     Encode Latitude and Longitude with precision by Monroe algorithm.
@@ -50,22 +47,3 @@ def encode(latitude: float, longitude: float, precision: int = 12) -> str:
             bit = 0
             ch = 0
     return "".join(geohash)
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--lon", required=True, type=float, help="Longitude of object")
-    parser.add_argument("--lat", required=True, type=float, help="Latitude of object")
-    parser.add_argument(
-        "--precision", required=False, type=int, help="Precision of GeoHash"
-    )
-    args = parser.parse_args()
-
-    precision = args.precision or 12
-    geo_hash = encode(args.lat, args.lon, precision)
-
-    print(f"GeoHash for Longitude: {args.lon} & Latitude: {args.lat} is '{geo_hash}'")
-
-
-if __name__ == "__main__":
-    main()

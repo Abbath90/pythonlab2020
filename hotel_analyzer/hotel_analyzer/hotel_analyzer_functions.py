@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
-from monroe.monroe import encode
+from hotel_analyzer.hotel_analyzer.monroe import encode
 
 
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
