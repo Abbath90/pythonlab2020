@@ -18,7 +18,7 @@ Options:
 
 
 ### Usage example:
-`hotel_analyzer_run.py --data=../data/hotels.zip --output_dir=../res --size=100 --threads=5`
+`hotel_analyzer_run.py --data=./data/hotels.zip --output_dir=../res --size=100 --threads=5`
 
 
 

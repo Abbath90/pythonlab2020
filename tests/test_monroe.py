@@ -1,6 +1,6 @@
 import pytest
 
-from hotel_analyzer.hotel_analyzer.monroe import encode
+from monroe.monroe import encode
 
 
 class TestMonroe:

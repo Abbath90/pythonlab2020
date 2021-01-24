@@ -3,7 +3,7 @@ import pytest
 from pandas.testing import assert_frame_equal
 from datetime import date, timedelta
 
-from hotel_analyzer.hotel_analyzer.hotel_analyzer_functions import clean_df, get_series_of_top_cities, get_coordinates_of_center, \
+from hotel_analyzer_functions import clean_df, get_series_of_top_cities, get_coordinates_of_center, \
     get_day_city_max_temp, get_max_change, get_day_city_min_temp, get_max_dif
 
 dict_for_test_basic_df = {
